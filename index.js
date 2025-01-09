@@ -1,5 +1,5 @@
 import * as Carousel from "./Carousel.js";
-import axios from "axios";
+// import axios from "axios";
 
 // The breed selection input element.
 const breedSelect = document.getElementById("breedSelect");
@@ -11,7 +11,8 @@ const progressBar = document.getElementById("progressBar");
 const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
 // Step 0: Store your API key here for reference and easy access.
-const API_KEY = "";
+const API_KEY ='live_w0Ezw2vCZfWAMsTIAn4kkFfqZpvrrOlZOc682APaaI8IijxazuV1ArD8fmeTvIkF';
+  
 
 /**
  * 1. Create an async function "initialLoad" that does the following:
@@ -21,7 +22,20 @@ const API_KEY = "";
  *  - Each option should display text equal to the name of the breed.
  * This function should execute immediately.
  */
+async function initialLoad() {
+  const req = await axios.get("https://api.thecatapi.com/v1/breeds");
+  const data = req.data;
 
+  for (let i = 0; i < data.length; i++) {
+    let option = document.createElement("OPTION");
+    option.id = data[i].id;
+    option.value = data[i].id;
+    option.text = data[i].name;
+
+    breedSelect.appendChild(option);
+  }
+}
+initialLoad();
 /**
  * 2. Create an event handler for breedSelect that does the following:
  * - Retrieve information on the selected breed from the cat API using fetch().
@@ -36,6 +50,25 @@ const API_KEY = "";
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
+
+// https://api.thecatapi.com/v1/images/search?breed_ids=beng
+breedSelect.addEventListener("change", async (e) => {
+  Carousel.clear();
+  let index = e.target.selectedIndex;
+  let val = e.target.options[index].id;
+  console.log(val);
+  const req = await axios.get(
+    `https://api.thecatapi.com/v1/images/search?limit=10&breed_ids=${val}&api_key=${API_KEY}`
+  );
+  console.log(req.data[0].url);
+  for (let i = 0; i < req.data.length; i++) {
+    let carItem = Carousel.createCarouselItem(req.data[i].url);
+
+    Carousel.appendCarousel(carItem);
+
+  }
+  Carousel.start()
+});
 
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
